@@ -180,7 +180,7 @@ const PokemonPage: NextPage<Props> = ({ pokemon, evolutions }) => {
                       <ImgType types={types} />
                     </Grid>
                   </Grid>
-                  {i < 2 && (
+                  {i +1 < evolutions.length && (
                     <Image
                       src="/downVector.svg"
                       alt="down"
@@ -318,7 +318,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     const { data } = await pokeApi.get<PokemonContent>(`/pokemon/${name}`);
 
     return {
-      icons: data.sprites.versions?.["generation-viii"].icons.front_default,
+      icons: data.sprites.versions?.["generation-viii"].icons.front_default || '',
       name: data.name,
       id: data.id,
       types: data.types,
