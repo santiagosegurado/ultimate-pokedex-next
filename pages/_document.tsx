@@ -1,9 +1,13 @@
+import { CssBaseline } from '@nextui-org/react'
 import { Html, Head, Main, NextScript } from 'next/document'
 
-export default function Document() {
+
+const Document = () =>{
   return (
     <Html lang="en">
-      <Head />
+      <Head>
+        {CssBaseline.flush()}
+      </Head>
       <body>
         <Main />
         <NextScript />
@@ -11,3 +15,5 @@ export default function Document() {
     </Html>
   )
 }
+
+export default Document
