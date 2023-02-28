@@ -11,13 +11,14 @@ import {
   Text,
   Progress,
   Link,
+  Container,
 } from "@nextui-org/react";
 import Image from "next/image";
 import { ImgType } from "../../components/pokemons/ImgType";
 import NextLink from "next/link";
 import { toggleFavorites, pokemonInStorage } from "../../utils";
 import { useState } from "react";
-import confetti from 'canvas-confetti'
+import confetti from "canvas-confetti";
 
 interface Props {
   pokemon: PokemonContent;
@@ -32,25 +33,24 @@ interface Pokevolution {
   types: any;
 }
 
-const PokemonPage: NextPage<Props> = ({ pokemon, evolutions }) => {
-
+const PokemonPage: NextPage<Props> = ({ pokemon, evolutions, specie }) => {
   const [isFavorite, setIsFavorite] = useState(pokemonInStorage(pokemon.id));
 
   const onToggleFavorites = () => {
     toggleFavorites(pokemon.id);
     setIsFavorite(!isFavorite);
 
-    if (isFavorite) return ;
+    if (isFavorite) return;
 
     confetti({
-      zIndex:999,
+      zIndex: 999,
       particleCount: 100,
       spread: 160,
       angle: -100,
-      origin:{
-        x:0,
-        y:0
-      }
+      origin: {
+        x: 0,
+        y: 0,
+      },
     });
   };
 
@@ -79,28 +79,27 @@ const PokemonPage: NextPage<Props> = ({ pokemon, evolutions }) => {
             />
           </Grid>
         </Grid.Container>
-        {/* Img/Name/Evolutions Container */}
+        {/* Img/Name/Desc Container */}
         <Grid.Container gap={2} css={{ marginTop: 10 }}>
           <Grid xs={12} md={6} lg={4}>
             <Card>
               <Card.Header css={{ p: "10px 0px 5px 10px" }}>
-                <Button auto light color={"error"} onClick={onToggleFavorites} >
-                  {
-                    isFavorite ? 
+                <Button auto light color={"error"} onClick={onToggleFavorites}>
+                  {isFavorite ? (
                     <Image
                       src="/heartActiveVector.svg"
                       alt="heart"
                       width={25}
                       height={25}
                     />
-                    :
+                  ) : (
                     <Image
                       src="/heartVector.svg"
                       alt="heart"
                       width={25}
                       height={25}
                     />
-                  }
+                  )}
                 </Button>
               </Card.Header>
               <Card.Body css={{ alignItems: "center" }}>
@@ -111,9 +110,12 @@ const PokemonPage: NextPage<Props> = ({ pokemon, evolutions }) => {
                   height={250}
                 />
               </Card.Body>
+              <Card.Footer css={{textAlign:'center'}}>
+                <Text h3>{specie.flavor_text_entries[0]?.flavor_text || ''}</Text>
+              </Card.Footer>
             </Card>
           </Grid>
-          <Grid xs={12} sm={6} md={3} lg={5} css={{ justifyContent: "center" }}>
+          <Grid xs={12} sm={6} md={3} css={{ justifyContent: "center" }}>
             <Grid>
               <Text h1>
                 {pokemon.name[0].toUpperCase() + pokemon.name.substring(1)}
@@ -156,10 +158,85 @@ const PokemonPage: NextPage<Props> = ({ pokemon, evolutions }) => {
               </Card>
             </Grid>
           </Grid>
+          <Grid xs={12} sm={6} md={5}>
+            <Container>
+              <Grid>
+                <Text h4 color="$gray500">
+                  Weight
+                </Text>
+                <Grid
+                  css={{
+                    border: "2px solid $gray100",
+                    padding: "2px 25px",
+                    m: 0,
+                    borderRadius: 15,
+                    textAlign: "center",
+                  }}
+                >
+                  <Text h4>{`${pokemon.weight * 0.1} Kg.`}</Text>
+                </Grid>
+              </Grid>
+              <Grid>
+                <Text h4 color="$gray500">
+                  Height
+                </Text>
+                <Grid
+                  css={{
+                    border: "2px solid $gray100",
+                    padding: "2px 25px",
+                    m: 0,
+                    borderRadius: 15,
+                    textAlign: "center",
+                  }}
+                >
+                  <Text h4>{`${pokemon.height * 0.1}`.substring(0, 3)} M.</Text>
+                </Grid>
+              </Grid>
+            </Container>
+            <Container>
+              <Grid>
+                <Text h4 color="$gray500">
+                  Category
+                </Text>
+                <Grid
+                  css={{
+                    border: "2px solid $gray100",
+                    padding: "2px 25px",
+                    m: 0,
+                    borderRadius: 15,
+                    textAlign: "center",
+                  }}
+                >
+                  <Text h4>{specie.genera[4].genus}</Text>
+                </Grid>
+              </Grid>
+              <Grid>
+                <Text h4 color="$gray500">
+                  Ability
+                </Text>
+                <Grid
+                  css={{
+                    border: "2px solid $gray100",
+                    padding: "2px 25px",
+                    m: 0,
+                    borderRadius: 15,
+                    textAlign: "center",
+                  }}
+                >
+                  <Text h4 transform="capitalize">
+                    {pokemon.abilities[0].ability.name}
+                  </Text>
+                </Grid>
+              </Grid>
+            </Container>
+          </Grid>
+        </Grid.Container>
+        {/* Stats/Evolution Container */}
+        <Grid.Container css={{ mb: 40, justifyContent: "space-around" }}>
           <Grid
             xs={12}
             sm={4}
-            md={3}
+            md={4}
             css={{
               display: "flex",
               flexDirection: "column",
@@ -176,7 +253,7 @@ const PokemonPage: NextPage<Props> = ({ pokemon, evolutions }) => {
               }}
             >
               {evolutions.map(({ icons, name, id, types }, i) => (
-                <Card.Body key={name} css={{ p: 0 }}>
+                <Card.Body key={name}>
                   <Grid
                     css={{
                       display: "flex",
@@ -219,9 +296,6 @@ const PokemonPage: NextPage<Props> = ({ pokemon, evolutions }) => {
               ))}
             </Card>
           </Grid>
-        </Grid.Container>
-        {/* Stats Container */}
-        <Grid.Container>
           <Grid
             xs={12}
             lg={4}
