@@ -1,12 +1,13 @@
-import { Text, useTheme, Button, Switch } from "@nextui-org/react";
+import { Link ,useTheme, Button, Switch } from "@nextui-org/react";
 import { HeartIcon } from "../../public/HeartIcon";
 import Image from "next/image";
 import { useTheme as useNextTheme } from "next-themes";
 import { SunIcon } from "../../public/SunIcon";
 import { MoonIcon } from "../../public/MoonIcon";
+import NextLink from 'next/link';
 
 export const Navbar = () => {
-  const { theme, isDark, type } = useTheme();
+  const { theme, isDark } = useTheme();
   const { setTheme } = useNextTheme();
 
   return (
@@ -22,13 +23,17 @@ export const Navbar = () => {
       }}
     >
       <div style={{ display: "flex", alignItems: "center" }}>
-        <Image
-          src="/logoPokemon.svg"
-          alt="Pokemon"
-          width={120}
-          height={50}
-          style={{margin: 10}}
-        />
+        <NextLink href='/' passHref>
+          {/* <Link> */}
+            <Image
+              src="/logoPokemon.svg"
+              alt="Pokemon"
+              width={120}
+              height={50}
+              style={{margin: 10}}
+            />
+          {/* </Link> */}
+        </NextLink>
       </div>
 
       <div
@@ -40,13 +45,15 @@ export const Navbar = () => {
           alignItems: "center",
         }}
       >
-        <Button
-          auto
-          css={{
-            backgroundColor: '$errorBorderHover'
-          }}
-          icon={<HeartIcon fill="currentColor" filled />}
-        />
+        <NextLink href='/favorites'>
+          <Button
+            auto
+            css={{
+              backgroundColor: '$errorBorderHover'
+            }}
+            icon={<HeartIcon fill="currentColor" filled />}
+          />
+        </NextLink>
         <Switch
           checked={isDark}
           // shadow

@@ -10,12 +10,14 @@ import {
   Card,
   Text,
   Progress,
-  Row,
-  Col,
+  Link,
 } from "@nextui-org/react";
 import Image from "next/image";
-import { useRouter } from "next/router";
 import { ImgType } from "../../components/pokemons/ImgType";
+import NextLink from "next/link";
+import { toggleFavorites, pokemonInStorage } from "../../utils";
+import { useState } from "react";
+import confetti from 'canvas-confetti'
 
 interface Props {
   pokemon: PokemonContent;
@@ -31,27 +33,43 @@ interface Pokevolution {
 }
 
 const PokemonPage: NextPage<Props> = ({ pokemon, evolutions }) => {
-  const router = useRouter();
+
+  const [isFavorite, setIsFavorite] = useState(pokemonInStorage(pokemon.id));
+
+  const onToggleFavorites = () => {
+    toggleFavorites(pokemon.id);
+    setIsFavorite(!isFavorite);
+
+    if (isFavorite) return ;
+
+    confetti({
+      zIndex:999,
+      particleCount: 100,
+      spread: 160,
+      angle: -100,
+      origin:{
+        x:0,
+        y:0
+      }
+    });
+  };
 
   return (
     <Layout title={pokemon.name[0].toUpperCase() + pokemon.name.substring(1)}>
       <>
         {/* Search/Back Container  */}
         <Grid.Container css={{ marginTop: "10px" }}>
-          <Grid xs={3} lg={3}>
-            <Button
-              auto
-              light
-              color={"default"}
-              onClick={() => router.push("/")}
-            >
-              <Image
-                src="/arrowVector.svg"
-                alt="arrow"
-                width={20}
-                height={20}
-              />
-            </Button>
+          <Grid xs={3} lg={3} alignItems="center">
+            <NextLink href="/">
+              <Link css={{ p: 10 }}>
+                <Image
+                  src="/arrowVector.svg"
+                  alt="arrow"
+                  width={25}
+                  height={25}
+                />
+              </Link>
+            </NextLink>
           </Grid>
           <Grid xs={9} lg={6} justify={"center"}>
             <Input
@@ -63,16 +81,26 @@ const PokemonPage: NextPage<Props> = ({ pokemon, evolutions }) => {
         </Grid.Container>
         {/* Img/Name/Evolutions Container */}
         <Grid.Container gap={2} css={{ marginTop: 10 }}>
-          <Grid xs={12} lg={4}>
+          <Grid xs={12} md={6} lg={4}>
             <Card>
               <Card.Header css={{ p: "10px 0px 5px 10px" }}>
-                <Button auto light color={"error"}>
-                  <Image
-                    src="/heartVector.svg"
-                    alt="arrow"
-                    width={25}
-                    height={25}
-                  />
+                <Button auto light color={"error"} onClick={onToggleFavorites} >
+                  {
+                    isFavorite ? 
+                    <Image
+                      src="/heartActiveVector.svg"
+                      alt="heart"
+                      width={25}
+                      height={25}
+                    />
+                    :
+                    <Image
+                      src="/heartVector.svg"
+                      alt="heart"
+                      width={25}
+                      height={25}
+                    />
+                  }
                 </Button>
               </Card.Header>
               <Card.Body css={{ alignItems: "center" }}>
@@ -85,7 +113,7 @@ const PokemonPage: NextPage<Props> = ({ pokemon, evolutions }) => {
               </Card.Body>
             </Card>
           </Grid>
-          <Grid xs={12} lg={4} css={{ justifyContent: "center" }}>
+          <Grid xs={12} sm={6} md={3} lg={5} css={{ justifyContent: "center" }}>
             <Grid>
               <Text h1>
                 {pokemon.name[0].toUpperCase() + pokemon.name.substring(1)}
@@ -131,6 +159,7 @@ const PokemonPage: NextPage<Props> = ({ pokemon, evolutions }) => {
           <Grid
             xs={12}
             sm={4}
+            md={3}
             css={{
               display: "flex",
               flexDirection: "column",
@@ -138,10 +167,8 @@ const PokemonPage: NextPage<Props> = ({ pokemon, evolutions }) => {
             }}
           >
             <h3>Evolution Chain</h3>
-            <Grid
+            <Card
               css={{
-                border: "2px solid $gray100",
-                borderRadius: 20,
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
@@ -149,13 +176,13 @@ const PokemonPage: NextPage<Props> = ({ pokemon, evolutions }) => {
               }}
             >
               {evolutions.map(({ icons, name, id, types }, i) => (
-                <>
+                <Card.Body key={name} css={{ p: 0 }}>
                   <Grid
-                    key={name}
                     css={{
                       display: "flex",
                       flexDirection: "row",
                       p: 0,
+                      alignItems: "center",
                     }}
                   >
                     <Grid css={{ display: "flex", alignItems: "center" }}>
@@ -176,11 +203,11 @@ const PokemonPage: NextPage<Props> = ({ pokemon, evolutions }) => {
                         {id}
                       </Text>
                     </Grid>
-                    <Grid css={{ display: "flex" }}>
+                    <Grid css={{ display: "flex", flexDirection: "column" }}>
                       <ImgType types={types} />
                     </Grid>
                   </Grid>
-                  {i +1 < evolutions.length && (
+                  {i + 1 < evolutions.length && (
                     <Image
                       src="/downVector.svg"
                       alt="down"
@@ -188,9 +215,9 @@ const PokemonPage: NextPage<Props> = ({ pokemon, evolutions }) => {
                       height={30}
                     />
                   )}
-                </>
+                </Card.Body>
               ))}
-            </Grid>
+            </Card>
           </Grid>
         </Grid.Container>
         {/* Stats Container */}
@@ -318,7 +345,8 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     const { data } = await pokeApi.get<PokemonContent>(`/pokemon/${name}`);
 
     return {
-      icons: data.sprites.versions?.["generation-viii"].icons.front_default || '',
+      icons:
+        data.sprites.versions?.["generation-viii"].icons.front_default || "",
       name: data.name,
       id: data.id,
       types: data.types,

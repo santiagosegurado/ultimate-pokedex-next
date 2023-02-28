@@ -21,7 +21,7 @@ export const CardPokemon: FC<Props> = ({ id, img, name, types }) => {
 
 
   return (
-    <Grid key={id} xs={6} sm={3} md={2}>
+    <Grid key={id} xs={12} sm={3} md={2}>
       <Card isPressable isHoverable onClick={handleLink}>
         <Card.Header css={{ justifyContent: "flex-end" }}>
           <ImgType types={types} />

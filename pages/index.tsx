@@ -11,7 +11,7 @@ interface Props {
 
 const HomePage: NextPage<Props> = ({ pokemons }) => {
   return (
-    <Layout title="Pokemon List">
+    <Layout title="Pokedex">
       <>
         <Grid.Container gap={2}>
           {pokemons.map(({ id, img, name, types }) => (
