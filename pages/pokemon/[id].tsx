@@ -110,8 +110,10 @@ const PokemonPage: NextPage<Props> = ({ pokemon, evolutions, specie }) => {
                   height={250}
                 />
               </Card.Body>
-              <Card.Footer css={{textAlign:'center'}}>
-                <Text h3>{specie.flavor_text_entries[0]?.flavor_text || ''}</Text>
+              <Card.Footer css={{ textAlign: "center" }}>
+                <Text h3>
+                  {specie.flavor_text_entries[0]?.flavor_text || ""}
+                </Text>
               </Card.Footer>
             </Card>
           </Grid>
@@ -388,54 +390,65 @@ export const getStaticPaths: GetStaticPaths = async (ctx) => {
     //     params: {id: '3'},
     //   }
     // ],
-    fallback: false,
+    fallback: "blocking",
   };
 };
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
   const { id } = params as { id: string };
 
-  const { data } = await pokeApi.get<PokemonContent>(`/pokemon/${id}`);
+  try {
+    const { data } = await pokeApi.get<PokemonContent>(`/pokemon/${id}`);
 
-  const { data: specie } = await pokeApi.get<PokemonSpecie>(
-    `/pokemon-species/${id}`
-  );
+    const { data: specie } = await pokeApi.get<PokemonSpecie>(
+      `/pokemon-species/${id}`
+    );
 
-  const { data: evolve_chain } = await pokeApi.get(specie.evolution_chain.url);
+    const { data: evolve_chain } = await pokeApi.get(
+      specie.evolution_chain.url
+    );
 
-  const evolves_names: string[] = [evolve_chain.chain.species.name];
+    const evolves_names: string[] = [evolve_chain.chain.species.name];
 
-  if (evolve_chain.chain.evolves_to.length > 0) {
-    evolves_names.push(evolve_chain.chain.evolves_to[0].species.name);
+    if (evolve_chain.chain.evolves_to.length > 0) {
+      evolves_names.push(evolve_chain.chain.evolves_to[0].species.name);
 
-    if (evolve_chain.chain.evolves_to[0].evolves_to.length > 0) {
-      evolves_names.push(
-        evolve_chain.chain.evolves_to[0].evolves_to[0].species.name
-      );
+      if (evolve_chain.chain.evolves_to[0].evolves_to.length > 0) {
+        evolves_names.push(
+          evolve_chain.chain.evolves_to[0].evolves_to[0].species.name
+        );
+      }
     }
-  }
 
-  const iconPromise = evolves_names.map(async (name: string) => {
-    const { data } = await pokeApi.get<PokemonContent>(`/pokemon/${name}`);
+    const iconPromise = evolves_names.map(async (name: string) => {
+      const { data } = await pokeApi.get<PokemonContent>(`/pokemon/${name}`);
+
+      return {
+        icons:
+          data.sprites.versions?.["generation-viii"].icons.front_default || "",
+        name: data.name,
+        id: data.id,
+        types: data.types,
+      };
+    });
 
     return {
-      icons:
-        data.sprites.versions?.["generation-viii"].icons.front_default || "",
-      name: data.name,
-      id: data.id,
-      types: data.types,
+      props: {
+        pokemon: data,
+        specie,
+        evolutions: await Promise.all(iconPromise).then((i) => {
+          return i;
+        }),
+      },
     };
-  });
-
-  return {
-    props: {
-      pokemon: data,
-      specie,
-      evolutions: await Promise.all(iconPromise).then((i) => {
-        return i;
-      }),
-    },
-  };
+  } catch (error) {
+    return {
+      redirect: {
+        permanent: false,
+        destination: "/",
+      },
+    };
+  }
 };
 
 export default PokemonPage;

@@ -437,6 +437,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
         return i;
       }),
     },
+    revalidate: 86400
   };
 };
 
